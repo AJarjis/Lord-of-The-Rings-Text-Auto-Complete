@@ -18,28 +18,16 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  *
  * @author Ali Jarjis
  */
 public class DictionaryMaker {
-
-    /**
-     * Stores a list of words and their frequency
-     */
-    private LinkedHashMap<String, Integer> dictionary;
-
-    /**
-     * Constructor for a DictionaryMaker
-     */
-    public DictionaryMaker() {
-        dictionary = new LinkedHashMap<>();
-    }
+    public DictionaryMaker() {}
 
     /**
      * Reads all the words in a comma separated text document into an Array
@@ -89,8 +77,11 @@ public class DictionaryMaker {
      * Forms a dictionary (sorted alphabetically) from a list of words
      *
      * @param words list of words to form dictionary from
+     * @return      hash table of words and their frequency
      */
-    public void formDictionary(ArrayList<String> words) {
+    public static TreeMap formDictionary(ArrayList<String> words) {
+        TreeMap<String, Integer> dictionary = new TreeMap();
+        
         for (String w : words) {
             if (dictionary.containsKey(w)) {
                 dictionary.put(w, dictionary.get(w) + 1);
@@ -98,6 +89,8 @@ public class DictionaryMaker {
                 dictionary.put(w, 1);
             }
         }
+        
+        return dictionary;
     }
 
     /**
@@ -105,39 +98,29 @@ public class DictionaryMaker {
      *
      * @throws java.io.IOException if failed to write to file
      */
-    public void saveToFile() throws IOException {
+    public static void saveToFile(TreeMap dictionary) throws IOException {
         String file = "dictionaryOuput.txt";
-
+        
         FileWriter fileWriter = new FileWriter(file);
         PrintWriter printWriter = new PrintWriter(fileWriter);
 
         /* Iterating through hashmap was implemented from
            http://www.java2novice.com/java-collections-and-util
                  /linkedhashmap/read/                           */
-        Set<String> keys = this.dictionary.keySet();
+        Set<String> keys = dictionary.keySet();
         for(String k : keys){
-            printWriter.println(k + ", " + this.dictionary.get(k));
+            printWriter.println(k + ", " + dictionary.get(k));
         }
 
         printWriter.close();
 
     }
 
-    /**
-     * Retrieves the dictionary that has been formed
-     *
-     * @return the dictionary that was made
-     */
-    public HashMap<String, Integer> getDictionary() {
-        return this.dictionary;
-    }
-
     public static void main(String[] args) throws Exception {
-        DictionaryMaker df = new DictionaryMaker();
         ArrayList<String> in = readWordsFromCSV("testDocument.txt");
-
-        df.formDictionary(in);
         
-        df.saveToFile();
+        TreeMap dictionary = DictionaryMaker.formDictionary(in);
+        
+        DictionaryMaker.saveToFile(dictionary);
     }
 }
