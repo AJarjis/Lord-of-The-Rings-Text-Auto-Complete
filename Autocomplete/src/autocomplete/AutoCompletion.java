@@ -12,20 +12,53 @@ Author      : Ali Jarjis
 
 package autocomplete;
 
+import static autocomplete.DictionaryMaker.readWordsFromCSV;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeMap;
+
 /**
  *
  * @author Ali Jarjis
  */
 public class AutoCompletion {
+    /**
+     * Adds a dictionary of words with their frequency to a trie
+     * 
+     * @param dictionary    dictionary to add
+     * @return              trie formed from words in dictionary
+     */
+    public static Trie addDictionary(TreeMap<String, Integer> dictionary) {
+        Trie dictionaryTrie = new Trie();
+        
+        Set<String> keys = dictionary.keySet();
+        
+        // Adds each element in dictionary to trie
+        for(String k : keys){
+            // TODO: change so it sets the frequency, rather than loop
+            for (int i = 0; i < dictionary.get(k); i++) {
+                dictionaryTrie.add(k);
+            }
+        }
+        
+        return dictionaryTrie;
+    }
 
-    public static void main(String[] args) {
-        // TODO: form dictionary from lotr.csv
-        // TODO: create autocompletionTrie.java which stores a frequency count
-                // requires updating trienode to store frequency
-                // requires updating trie add(key) to update frequency 
-                    // if success is false at end of for loop 
-        // TODO: construct a trie from the dictionary, adding each word to 
-            //the trie with it's frequency
+    public static void main(String[] args) throws FileNotFoundException {
+        ArrayList<String> lotr = readWordsFromCSV("lotr.csv");
+        
+        TreeMap dictionary = DictionaryMaker.formDictionary(lotr);
+        
+        Trie treebeard = addDictionary(dictionary);
+        
+        ArrayList<String> lotrQueries = readWordsFromCSV("lotrQueries.csv");
+        
+        for(String q : lotrQueries){
+            Trie queryTrie = treebeard.getSubTrie(q);
+            //TODO: get all words from subtrie and store in linkedhashmap
+            //queryTrie.getAllWords(queryTrie.root, word, lotr);
+        }
     }
 
 }

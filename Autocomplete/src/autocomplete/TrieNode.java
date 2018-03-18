@@ -8,7 +8,7 @@
  *
  * Author      : Ali Jarjis
  *
- ***************************************************************************** */
+ ******************************************************************************/
 package autocomplete;
 
 /**
@@ -48,11 +48,18 @@ public class TrieNode {
      * Creates a new child node for a given value
      * 
      * @param c     value to add as offspring
+     * @return      true if newly created offspring, false if already existed
      */
-    public void setOffspring(char c) {
+    public boolean setOffspring(char c) {
         c = Character.toLowerCase(c);   // Ensures trie remains lowercase
         int pos = c - 'a';  // Get value's position in alphabet (minus 1)
         
-        offspring[pos] = new TrieNode(c);
+        if (offspring[pos] == null) {
+            offspring[pos] = new TrieNode(c);
+            return true;
+        } else {
+            return false;
+        }
+        
     }
 }

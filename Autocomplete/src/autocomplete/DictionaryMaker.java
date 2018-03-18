@@ -8,7 +8,7 @@
  *
  * Author      : Ali Jarjis
  *
- ***************************************************************************** */
+ ******************************************************************************/
 package autocomplete;
 
 import java.io.File;
@@ -40,7 +40,7 @@ public class DictionaryMaker {
     public static ArrayList<String> readWordsFromCSV(String file)
             throws FileNotFoundException {
         Scanner sc = new Scanner(new File(file));
-        sc.useDelimiter(" |,");
+        sc.useDelimiter("[ |,\r\n]+");
         ArrayList<String> words = new ArrayList<>();
         String str;
 

@@ -12,12 +12,9 @@
 package autocomplete;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Stack;
 
 /**
  *
@@ -57,16 +54,12 @@ public class Trie {
         for (int i = 0; i < key.length(); i++) {
             char c = key.charAt(i);
 
-            TrieNode nextNode = currentNode.getOffspring(c);
-
             // Adds char to Trie if it doesn't exist
-            if (nextNode == null) {
-                currentNode.setOffspring(c);
-                nextNode = currentNode.getOffspring(c);
+            if (currentNode.setOffspring(c)) {
                 success = true;
             }
 
-            currentNode = nextNode;
+            currentNode = currentNode.getOffspring(c);;
         }
 
         currentNode.isWord = true;
@@ -114,7 +107,7 @@ public class Trie {
         while (!queue.isEmpty()) {
             TrieNode currentNode = queue.remove();
 
-            // Appends valid character to string
+            // Appends valid character to result
             if (currentNode.value != null) {
                 bfsResult.append(currentNode.value);
             }
@@ -137,7 +130,8 @@ public class Trie {
      * @param dfsResult string representing current depth first traversal
      * @return string representing a depth first traversal
      */
-    public String outputDepthFirstSearch(TrieNode currentNode, StringBuilder dfsResult) {
+    public String outputDepthFirstSearch(TrieNode currentNode,
+            StringBuilder dfsResult) {
         // For each offspring, recursively call this method
         for (int i = 0; i < currentNode.offspring.length; i++) {
             if (currentNode.offspring[i] != null) {
@@ -145,7 +139,7 @@ public class Trie {
             }
         }
 
-        // Append valid character to string
+        // Append valid character to result
         if (currentNode.value != null) {
             dfsResult.append(currentNode.value);
         }
@@ -180,25 +174,35 @@ public class Trie {
     }
 
     /**
-     * Retrieves all words in the trie
+     * Retrieves all words in the trie (recursively)
      *
-     * @return a list containing all words in the trie
+     * @param currentNode   node currently being traversed
+     * @param word          word currently being built
+     * @param allWords      all words currently found within trie
+     * @return              a list containing all words in the trie
      */
-    public List getAllWords(TrieNode currentNode, StringBuilder word, List allWords) {
+    public List getAllWords(TrieNode currentNode, StringBuilder word,
+            List allWords) {
+        // Appends current node character to word (if valid)
         if (currentNode.value != null) {
             word.append(currentNode.value);
         }
 
+        // Adds word to list once found
         if (currentNode.isWord) {
             allWords.add(new StringBuilder(word));
-            word.setLength(0);
-        } else {
-            // For each offspring, recursively call this method
-            for (int i = 0; i < currentNode.offspring.length; i++) {
-                if (currentNode.offspring[i] != null) {
-                    allWords = getAllWords(currentNode.offspring[i], word, allWords);
-                }
+        }
+        
+        // For each offspring, recursively call this method
+        for (int i = 0; i < currentNode.offspring.length; i++) {
+            if (currentNode.offspring[i] != null) {
+                getAllWords(currentNode.offspring[i], word, allWords);
             }
+        }
+        
+        // Removes current node character from word (if valid)
+        if (currentNode.value != null) {
+            word.deleteCharAt(word.length() - 1);
         }
 
         return allWords;
