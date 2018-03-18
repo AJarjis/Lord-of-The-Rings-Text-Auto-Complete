@@ -11,6 +11,8 @@
  ***************************************************************************** */
 package autocomplete;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -103,7 +105,7 @@ public class Trie {
      * @return string representing a breadth first traversal
      */
     public String outputBreadthFirstSearch() {
-        StringBuilder searchResult = new StringBuilder();
+        StringBuilder bfsResult = new StringBuilder();
 
         Queue<TrieNode> queue = new LinkedList<>();
         queue.add(root);
@@ -114,7 +116,7 @@ public class Trie {
 
             // Appends valid character to string
             if (currentNode.value != null) {
-                searchResult.append(currentNode.value);
+                bfsResult.append(currentNode.value);
             }
 
             // Add all offspring of current node to queue
@@ -125,46 +127,30 @@ public class Trie {
             }
         }
 
-        return searchResult.toString();
+        return bfsResult.toString();
     }
 
     /**
-     * Traverses through trie in depth first traversal
+     * Traverses through trie in depth first traversal (recursively)
      *
+     * @param currentNode current node being traversed
+     * @param dfsResult string representing current depth first traversal
      * @return string representing a depth first traversal
      */
-    public String outputDepthFirstSearch() {
-        StringBuilder searchResult = new StringBuilder();
-        Stack<TrieNode> s = new Stack<>();
-
-        HashSet<TrieNode> seen = new HashSet<>();
-
-        s.push(root);
-
-        while (!s.isEmpty()) {
-            TrieNode currentNode = s.peek();
-
-            if (currentNode.value != null) {
-                searchResult.append(currentNode.value);
-            }
-
-            seen.add(currentNode);
-            int pos = 0;
-            boolean found = false;
-            while (!found && pos < currentNode.offspring.length) {
-                if (seen.contains(currentNode.offspring[pos])) {
-                    pos++;
-                } else {
-                    found = true;
-                }
-            }
-            if (!found) {
-                s.pop();
-            } else {
-                s.push(currentNode.offspring[pos]);
+    public String outputDepthFirstSearch(TrieNode currentNode, StringBuilder dfsResult) {
+        // For each offspring, recursively call this method
+        for (int i = 0; i < currentNode.offspring.length; i++) {
+            if (currentNode.offspring[i] != null) {
+                outputDepthFirstSearch(currentNode.offspring[i], dfsResult);
             }
         }
-        return searchResult.toString();
+
+        // Append valid character to string
+        if (currentNode.value != null) {
+            dfsResult.append(currentNode.value);
+        }
+
+        return dfsResult.toString();
     }
 
     /**
@@ -198,29 +184,77 @@ public class Trie {
      *
      * @return a list containing all words in the trie
      */
-    public List getAllWords() {
-        return null;
+    public List getAllWords(TrieNode currentNode, StringBuilder word, List allWords) {
+        if (currentNode.value != null) {
+            word.append(currentNode.value);
+        }
+
+        if (currentNode.isWord) {
+            allWords.add(new StringBuilder(word));
+            word.setLength(0);
+        } else {
+            // For each offspring, recursively call this method
+            for (int i = 0; i < currentNode.offspring.length; i++) {
+                if (currentNode.offspring[i] != null) {
+                    allWords = getAllWords(currentNode.offspring[i], word, allWords);
+                }
+            }
+        }
+
+        return allWords;
     }
 
     public static void main(String[] args) {
         Trie myTrie = new Trie();
 
-        myTrie.add("cheers");
-        myTrie.add("cheese");
-        myTrie.add("chat");
-        myTrie.add("cat");
-        myTrie.add("bat");
+        // Tests for adding to trie
+        System.out.println("Added cheers successfully? "
+                + myTrie.add("cheers"));
+        System.out.println("Added chat successfully? "
+                + myTrie.add("cheese"));
+        System.out.println("Added chat successfully? "
+                + myTrie.add("chat"));
+        System.out.println("Added cat successfully? "
+                + myTrie.add("cat"));
+        System.out.println("Added bat successfully? "
+                + myTrie.add("bat"));
+        System.out.println("Added chat successfully? "
+                + myTrie.add("chat"));
 
-        System.out.println(myTrie.contains("cheers"));
-        System.out.println(myTrie.contains("bat"));
-        System.out.println(myTrie.contains("chat"));
-        System.out.println(myTrie.contains("cat"));
-        System.out.println(myTrie.contains("ca"));
+        // Tests for trie contains
+        System.out.println("\nContains cheers? "
+                + myTrie.contains("cheers"));
+        System.out.println("Contains bat? "
+                + myTrie.contains("bat"));
+        System.out.println("Contains chat? "
+                + myTrie.contains("chat"));
+        System.out.println("Contains cat? "
+                + myTrie.contains("cat"));
+        System.out.println("Contains ca? "
+                + myTrie.contains("ca"));
+        System.out.println("Contains batman? "
+                + myTrie.contains("ca"));
 
+        // Test for bfs trie traversal
+        String bfs = myTrie.outputBreadthFirstSearch();
+        System.out.println("\nBreadth First Search: " + bfs);
+        System.out.println("BFS: " + bfs.equals("bcaahttaetersse"));
+
+        // Test for dfs trie traversal
+        StringBuilder dfsResult = new StringBuilder();
+        String dfs = myTrie.outputDepthFirstSearch(myTrie.root, dfsResult);
+        System.out.println("\nDepth First Search: " + dfs);
+        System.out.println("DFS: " + dfs.equals("tabtatasreseehc"));
+
+        // Test for sub-trie
         Trie newTrie = myTrie.getSubTrie("ch");
+        System.out.println("\nBreadth First Search (sub-trie 'ch'): "
+                + newTrie.outputBreadthFirstSearch());
 
-        System.out.println(myTrie.outputBreadthFirstSearch());
-        System.out.println(myTrie.outputDepthFirstSearch());
-
+        // Test for getting all words from trie
+        StringBuilder word = new StringBuilder();
+        List allWords = new ArrayList();
+        System.out.println("\nAll Words: "
+                + myTrie.getAllWords(myTrie.root, word, allWords).toString());
     }
 }
