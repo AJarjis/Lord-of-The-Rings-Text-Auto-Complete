@@ -96,6 +96,7 @@ public class DictionaryMaker {
     /**
      * Saves the dictionary to a file
      *
+     * @param dictionary    dictionary to save to file
      * @throws java.io.IOException if failed to write to file
      */
     public static void saveToFile(TreeMap dictionary) throws IOException {

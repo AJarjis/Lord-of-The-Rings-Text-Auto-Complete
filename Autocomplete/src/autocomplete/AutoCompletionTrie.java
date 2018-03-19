@@ -1,6 +1,6 @@
 /** ***************************************************************************
  *
- * File        : Trie.java
+ * File        : AutoCompletionTrie.java
  *
  * Date        : 15-Jan-2018
  *
@@ -8,27 +8,27 @@
  *
  * Author      : Ali Jarjis
  *
- ***************************************************************************** */
+ ******************************************************************************/
 package autocomplete;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 /**
  *
  * @author Ali Jarjis
  */
-public class Trie {
+public class AutoCompletionTrie {
 
-    TrieNode root;
+    AutoCompletionTrieNode root;
 
     /**
      * Constructs a Trie with a null root
      */
-    public Trie() {
-        this.root = new TrieNode(null);
+    public AutoCompletionTrie() {
+        this.root = new AutoCompletionTrieNode(null);
     }
 
     /**
@@ -36,7 +36,7 @@ public class Trie {
      *
      * @param root trienode to set as root
      */
-    public Trie(TrieNode root) {
+    public AutoCompletionTrie(AutoCompletionTrieNode root) {
         this.root = root;
         this.root.value = null;
     }
@@ -44,12 +44,13 @@ public class Trie {
     /**
      * Adds a key to the trie
      *
-     * @param key key to add to trie
-     * @return true if successful, else false
+     * @param key           key to add to trie
+     * @param frequency     amount of times to add this key to trie
+     * @return              true if successful, else false
      */
-    public boolean add(String key) {
+    public boolean add(String key, int frequency) {
         boolean success = false;
-        TrieNode currentNode = this.root;
+        AutoCompletionTrieNode currentNode = this.root;
 
         //Loops through each char in key adding to Trie if it doesn't exist
         for (int i = 0; i < key.length(); i++) {
@@ -64,6 +65,7 @@ public class Trie {
         }
 
         currentNode.isWord = true;
+        currentNode.frequency = frequency;
 
         return success;
     }
@@ -75,13 +77,13 @@ public class Trie {
      * @return true if key exists, else false
      */
     public boolean contains(String key) {
-        TrieNode currentNode = this.root;
+        AutoCompletionTrieNode currentNode = this.root;
 
         // Loops through each cahr in key checking if it exists in the Trie
         for (int i = 0; i < key.length(); i++) {
             char c = key.charAt(i);
 
-            TrieNode nextNode = currentNode.getOffspring(c);
+            AutoCompletionTrieNode nextNode = currentNode.getOffspring(c);
 
             if (nextNode == null) {
                 return false;
@@ -101,12 +103,12 @@ public class Trie {
     public String outputBreadthFirstSearch() {
         StringBuilder bfsResult = new StringBuilder();
 
-        Queue<TrieNode> queue = new LinkedList<>();
+        Queue<AutoCompletionTrieNode> queue = new LinkedList<>();
         queue.add(root);
 
         // Continuiously add each node to queue in breadth first order
         while (!queue.isEmpty()) {
-            TrieNode currentNode = queue.remove();
+            AutoCompletionTrieNode currentNode = queue.remove();
 
             // Appends valid character to result
             if (currentNode.value != null) {
@@ -131,7 +133,7 @@ public class Trie {
      * @param dfsResult string representing current depth first traversal
      * @return string representing a depth first traversal
      */
-    public String outputDepthFirstSearch(TrieNode currentNode,
+    public String outputDepthFirstSearch(AutoCompletionTrieNode currentNode,
             StringBuilder dfsResult) {
         // For each offspring, recursively call this method
         for (int i = 0; i < currentNode.offspring.length; i++) {
@@ -154,14 +156,14 @@ public class Trie {
      * @param prefix prefix to root trie at
      * @return sub-trie rooted at given prefix if exists, else null
      */
-    public Trie getSubTrie(String prefix) {
-        TrieNode currentNode = this.root;
+    public AutoCompletionTrie getSubTrie(String prefix) {
+        AutoCompletionTrieNode currentNode = this.root;
 
         //Loops through each char in prefix, checking they exist in the trie
         for (int i = 0; i < prefix.length(); i++) {
             char c = prefix.charAt(i);
 
-            TrieNode nextNode = currentNode.getOffspring(c);
+            AutoCompletionTrieNode nextNode = currentNode.getOffspring(c);
 
             // Return null if prefix does not exist in trie
             if (nextNode == null) {
@@ -171,7 +173,7 @@ public class Trie {
             currentNode = nextNode;
         }
 
-        return new Trie(currentNode);
+        return new AutoCompletionTrie(currentNode);
     }
 
     /**
@@ -182,8 +184,8 @@ public class Trie {
      * @param allWords      all words currently found within trie
      * @return              a list containing all words in the trie
      */
-    public List getAllWords(TrieNode currentNode, StringBuilder word,
-            List allWords) {
+    public HashMap getAllWords(AutoCompletionTrieNode currentNode, 
+            StringBuilder word, HashMap allWords) {
         // Appends current node character to word (if valid)
         if (currentNode.value != null) {
             word.append(currentNode.value);
@@ -191,7 +193,7 @@ public class Trie {
 
         // Adds word to list once found
         if (currentNode.isWord) {
-            allWords.add(new StringBuilder(word));
+            allWords.put(word.toString(), currentNode.frequency);
         }
         
         // For each offspring, recursively call this method
@@ -207,59 +209,5 @@ public class Trie {
         }
 
         return allWords;
-    }
-
-    public static void main(String[] args) {
-        Trie myTrie = new Trie();
-
-        // Tests for adding to trie
-        System.out.println("Added cheers successfully? "
-                + myTrie.add("cheers"));
-        System.out.println("Added chat successfully? "
-                + myTrie.add("cheese"));
-        System.out.println("Added chat successfully? "
-                + myTrie.add("chat"));
-        System.out.println("Added cat successfully? "
-                + myTrie.add("cat"));
-        System.out.println("Added bat successfully? "
-                + myTrie.add("bat"));
-        System.out.println("Added chat successfully? "
-                + myTrie.add("chat"));
-
-        // Tests for trie contains
-        System.out.println("\nContains cheers? "
-                + myTrie.contains("cheers"));
-        System.out.println("Contains bat? "
-                + myTrie.contains("bat"));
-        System.out.println("Contains chat? "
-                + myTrie.contains("chat"));
-        System.out.println("Contains cat? "
-                + myTrie.contains("cat"));
-        System.out.println("Contains ca? "
-                + myTrie.contains("ca"));
-        System.out.println("Contains batman? "
-                + myTrie.contains("ca"));
-
-        // Test for bfs trie traversal
-        String bfs = myTrie.outputBreadthFirstSearch();
-        System.out.println("\nBreadth First Search: " + bfs);
-        System.out.println("BFS: " + bfs.equals("bcaahttaetersse"));
-
-        // Test for dfs trie traversal
-        StringBuilder dfsResult = new StringBuilder();
-        String dfs = myTrie.outputDepthFirstSearch(myTrie.root, dfsResult);
-        System.out.println("\nDepth First Search: " + dfs);
-        System.out.println("DFS: " + dfs.equals("tabtatasreseehc"));
-
-        // Test for sub-trie
-        Trie newTrie = myTrie.getSubTrie("ch");
-        System.out.println("\nBreadth First Search (sub-trie 'ch'): "
-                + newTrie.outputBreadthFirstSearch());
-
-        // Test for getting all words from trie
-        StringBuilder word = new StringBuilder();
-        List allWords = new ArrayList();
-        System.out.println("\nAll Words: "
-                + myTrie.getAllWords(myTrie.root, word, allWords).toString());
     }
 }
